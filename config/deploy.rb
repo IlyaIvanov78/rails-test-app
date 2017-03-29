@@ -9,29 +9,28 @@ require 'mina/rbenv'  # for rbenv support. (https://rbenv.org)
 #   repository   - Git repo to clone from. (needed by mina/git)
 #   branch       - Branch name to deploy. (needed by mina/git)
 
-set :application_name, 'rails-app-test'
+set :application_name, 'rails-test-app'
 set :domain, '146.185.140.117'
 set :deploy_to, '/home/deploy/apps/production'
 set :repository, 'https://github.com/IlyaIvanov78/rails-test-app.git'
 set :branch, 'master'
 
 # Optional settings:
-set :user, 'deploy'          # Username in the server to SSH to.
-set :port, '10022'           # SSH port number.
-set :forward_agent, true     # SSH forward_agent.
+   set :user, 'deploy'          # Username in the server to SSH to.
+   set :port, '10022'           # SSH port number.
+   set :forward_agent, true     # SSH forward_agent.
 
 # shared dirs and files will be symlinked into the app-folder by the 'deploy:link_shared_paths' step.
-# set :shared_files, fetch(:shared_files, []).push('config/database.yml', 'config/secrets.yml')
-set :shared_dirs, fetch(:shared_dirs, []).push('tmp', 'log', 'public/system')
+set :shared_dirs, fetch(:shared_dirs, []).push('tmp','log','public')
 set :shared_files, fetch(:shared_files, []).push('config/database.yml', 'config/puma.rb',
-                      'config/secrets.yml', 'config/elasticsearch.yml', 'config/redis.yml')
+                      'config/secrets.yml', 'config/elasticsearch.yml', 'config/sidekiq.yml')
 
 # This task is the environment that is loaded for all remote run commands, such as
 # `mina deploy` or `mina rake`.
 task :environment do
   # If you're using rbenv, use this to load the rbenv environment.
   # Be sure to commit your .ruby-version or .rbenv-version to your repository.
-  # invoke :'rbenv:load'
+  invoke :'rbenv:load'
 
   # For those using RVM, use this to load an RVM version@gemset.
   # invoke :'rvm:use', 'ruby-1.9.3-p125@default'
@@ -54,9 +53,8 @@ task :deploy do
     invoke :'deploy:link_shared_paths'
     invoke :'bundle:install'
     invoke :'rails:db_migrate'
-    # invoke :'rails:assets_precompile'
+    invoke :'rails:assets_precompile'
     invoke :'deploy:cleanup'
-    invoke :'restart'
 
     on :launch do
       in_path(fetch(:current_path)) do
